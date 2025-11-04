@@ -1,0 +1,132 @@
+<div class="quiz-page max-w-4xl mx-auto">
+  <h1 class="quiz-title">Quizzes Interactivos sobre VPH</h1>
+
+  <!-- Selector de Quiz -->
+  @if (!selectedQuiz) {
+    <div class="grid gap-6 mb-8">
+      @for (quiz of quizzes; track quiz.id) {
+        <div class="quiz-card" role="button" tabindex="0" (click)="selectQuiz(quiz)" (keydown.enter)="selectQuiz(quiz)">
+          <div class="quiz-card-left">
+            <div class="quiz-initials">{{ quiz.title.charAt(0) }}</div>
+          </div>
+          <div class="quiz-card-body">
+            <h3 class="quiz-card-title">{{ quiz.title }}</h3>
+            <p class="quiz-card-desc">{{ quiz.description }}</p>
+
+            <div class="quiz-card-meta">
+              <span class="quiz-card-count">{{ quiz.questions.length }} preguntas</span>
+              @if (completedQuizzes.includes(quiz.id)) {
+                <span class="status-badge completed">Completado: {{ globalScores[quiz.id] }}/{{ quiz.questions.length }}</span>
+              } @else {
+                <span class="status-badge pending">Pendiente</span>
+              }
+            </div>
+
+            <div class="card-progress" aria-hidden="true">
+              <div class="card-progress-fill" [style.width.%]="completedQuizzes.includes(quiz.id) ? ((globalScores[quiz.id] || 0) / quiz.questions.length) * 100 : 0"></div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Resumen Global -->
+    @if (completedQuizzes.length > 0) {
+      <div class="quiz-summary">
+        <h2 class="text-2xl font-semibold mb-3">Progreso General</h2>
+        <p class="text-lg mb-2">Puntuación total: <strong>{{ getCompletedScore() }} de {{ getCompletedQuestions() }}</strong></p>
+        <p class="text-sm">Quizzes completados: <strong>{{ completedQuizzes.length }} de {{ quizzes.length }}</strong></p>
+      </div>
+    }
+  }
+
+  <!-- Quiz en Progreso -->
+  @if (selectedQuiz && !quizCompleted) {
+    <div class="bg-white shadow-lg rounded-lg p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-semibold">{{ selectedQuiz.title }}</h2>
+        <button class="text-blue-600 hover:text-blue-800 text-sm font-medium" (click)="backToQuizSelection()">← Volver a selección</button>
+      </div>
+      <p class="text-gray-600 mb-6">{{ selectedQuiz.description }}</p>
+
+      <div class="mb-6">
+        <div class="flex justify-between text-sm text-gray-600 mb-2">
+          <span>Pregunta {{ currentQuestionIndex + 1 }} de {{ selectedQuiz.questions.length }}</span>
+          <span>Puntuación: {{ score }}</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+               [style.width.%]="((currentQuestionIndex + 1) / selectedQuiz.questions.length) * 100"></div>
+        </div>
+      </div>
+
+      <h3 class="text-lg font-semibold mb-6 text-gray-900">{{ currentQuestion.question }}</h3>
+
+      <div class="space-y-3 mb-6">
+        <button
+          *ngFor="let option of currentQuestion.options; let i = index"
+          (click)="selectAnswer(i)"
+          [ngClass]="{
+            'option-btn': true,
+            'selected': selectedAnswer === i && !showFeedback,
+            'correct': showFeedback && i === currentQuestion.correctAnswer,
+            'incorrect': showFeedback && selectedAnswer === i && i !== currentQuestion.correctAnswer
+          }"
+          [disabled]="showFeedback"
+        >
+          <div class="flex items-center justify-between w-full">
+            <div class="option-text">{{ option }}</div>
+            @if (showFeedback && i === currentQuestion.correctAnswer) {
+              <div class="option-mark text-green-600">✔</div>
+            } @if (showFeedback && selectedAnswer === i && i !== currentQuestion.correctAnswer) {
+              <div class="option-mark text-red-600">✖</div>
+            }
+          </div>
+        </button>
+      </div>
+
+      <!-- Feedback Inmediato -->
+      @if (showFeedback) {
+        <div class="mb-6 p-4 rounded-lg" [class]="isCorrect ? 'bg-green-100' : 'bg-red-100'">
+          <p class="font-semibold" [class]="isCorrect ? 'text-green-800' : 'text-red-800'">{{ feedbackMessage }}</p>
+          @if (currentQuestion.explanation) {
+            <p class="mt-2 text-sm text-gray-700">{{ currentQuestion.explanation }}</p>
+          }
+        </div>
+      }
+
+      <button
+        (click)="nextQuestion()"
+        [disabled]="selectedAnswer === null || showFeedback"
+        class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+      >
+        {{ currentQuestionIndex < selectedQuiz.questions.length - 1 ? 'Siguiente' : 'Finalizar Quiz' }}
+      </button>
+    </div>
+  }
+
+  <!-- Resultados del Quiz -->
+  @if (quizCompleted) {
+    <div class="bg-white shadow-lg rounded-lg p-6 text-center">
+      <h2 class="text-2xl font-semibold mb-4">¡Quiz Completado!</h2>
+      <p class="text-lg mb-4 text-gray-700">Tu puntuación en "<strong>{{ selectedQuiz!.title }}</strong>": <strong>{{ score }} de {{ selectedQuiz!.questions.length }}</strong></p>
+      <p class="text-gray-600 mb-6">
+        {{ score >= selectedQuiz!.questions.length * 0.7 ? '¡Excelente trabajo! Has demostrado buen conocimiento sobre este tema.' : 'Puedes mejorar estudiando más sobre el VPH. ¡Intenta de nuevo!' }}
+      </p>
+      <div class="flex justify-center gap-4">
+        <button
+          (click)="restartQuiz()"
+          class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-medium"
+        >
+          Repetir este Quiz
+        </button>
+        <button
+          (click)="backToQuizSelection()"
+          class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 font-medium"
+        >
+          Elegir Otro Quiz
+        </button>
+      </div>
+    </div>
+  }
+</div>

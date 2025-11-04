@@ -1,0 +1,137 @@
+<div class="viaje-3d-root">
+  <div class="toolbar flex items-center justify-between mb-4 p-4 bg-white rounded-lg shadow">
+    <div class="flex items-center space-x-3">
+      <button class="btn flex items-center space-x-2" (click)="volver()">
+        <span>←</span>
+        <span>Volver</span>
+      </button>
+      <div>
+        <h3 class="text-lg font-semibold text-gray-800">Viaje 3D - Modelo Interactivo del Cuerpo Humano</h3>
+        <p class="text-xs text-gray-500">Haz clic en los puntos de colores para explorar</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <button 
+        class="btn-tour flex items-center space-x-2" 
+        (click)="startTour()"
+        [class.active]="tourActive">
+        <span>{{ tourActive ? '⏸️' : '▶️' }}</span>
+        <span>{{ tourActive ? 'Pausar Tour' : 'Tour Guiado' }}</span>
+      </button>
+      <button class="btn-primary" (click)="marcarCompletada()">✅ Completar experiencia</button>
+    </div>
+  </div>
+
+  <div class="viewer-container relative">
+    <!-- Canvas 3D -->
+    <div class="canvas-wrapper">
+      <div #canvasContainer class="canvas-container"></div>
+      
+      <div class="controls-hint text-center mt-2 text-sm text-gray-600">
+        🖱️ Arrastra para rotar • 🔍 Scroll para zoom • 👆 Clic en puntos de color para información
+      </div>
+    </div>
+
+    <!-- Panel de información lateral compacto -->
+    @if (showPanel && selectedHotspot) {
+      <div class="info-panel-side animate-slide-left">
+        <div class="panel-header">
+          <div class="flex items-center space-x-2">
+            <div class="w-3 h-3 rounded-full" 
+                 [style.background-color]="'#' + selectedHotspot.color.toString(16).padStart(6, '0')"></div>
+            <h3 class="text-base font-bold text-gray-800">{{ selectedHotspot.titulo }}</h3>
+          </div>
+          <button (click)="closePanel()" class="text-gray-400 hover:text-gray-600 text-xl">
+            ×
+          </button>
+        </div>
+
+        <p class="text-xs text-gray-600 mb-3 italic">{{ selectedHotspot.descripcion }}</p>
+
+        <div class="panel-content text-gray-700 text-xs leading-relaxed" [innerHTML]="selectedHotspot.contenido"></div>
+
+        <!-- Navegación compacta -->
+        <div class="panel-footer">
+          <button (click)="prevHotspot()" class="btn-nav-mini">
+            <span>←</span>
+          </button>
+          
+          <span class="text-xs text-gray-500">
+            {{ getCurrentHotspotIndex() + 1 }} / {{ hotspotsData.length }}
+          </span>
+          
+          <button (click)="nextHotspot()" class="btn-nav-mini">
+            <span>→</span>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Leyenda de hotspots -->
+  <div class="legend mt-4 bg-white rounded-lg shadow p-4">
+    <h4 class="text-sm font-semibold text-gray-700 mb-3">Puntos de información (10 puntos):</h4>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+      @for (hotspot of hotspotsData; track hotspot.id) {
+        <div class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded transition text-xs"
+             (click)="selectHotspot(hotspot)">
+          <div class="w-3 h-3 rounded-full shrink-0" 
+               [style.background-color]="'#' + hotspot.color.toString(16).padStart(6, '0')"></div>
+          <span class="text-gray-600 truncate">{{ hotspot.titulo }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Leyenda de flujos de partículas -->
+  <div class="particles-legend mt-4 bg-linear-to-br from-purple-50 to-pink-50 rounded-lg shadow p-4 border border-purple-100">
+    <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+      <span class="text-lg mr-2">🦠</span>
+      Flujos de transmisión del VPH:
+    </h4>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+      <div class="flex items-start space-x-2 bg-white/60 p-2 rounded">
+        <div class="w-3 h-3 rounded-full mt-0.5" style="background-color: #ff6b9d;"></div>
+        <div>
+          <p class="font-semibold text-gray-800">Vía Oral</p>
+          <p class="text-gray-600">Boca → Garganta → Cuello</p>
+        </div>
+      </div>
+      
+      <div class="flex items-start space-x-2 bg-white/60 p-2 rounded">
+        <div class="w-3 h-3 rounded-full mt-0.5" style="background-color: #ff4757;"></div>
+        <div>
+          <p class="font-semibold text-gray-800">Vía Genital</p>
+          <p class="text-gray-600">Zona externa → Mucosas internas</p>
+        </div>
+      </div>
+      
+      <div class="flex items-start space-x-2 bg-white/60 p-2 rounded">
+        <div class="w-3 h-3 rounded-full mt-0.5" style="background-color: #ffd93d;"></div>
+        <div>
+          <p class="font-semibold text-gray-800">Contacto de Piel</p>
+          <p class="text-gray-600">Circulación en área de torso</p>
+        </div>
+      </div>
+      
+      <div class="flex items-start space-x-2 bg-white/60 p-2 rounded">
+        <div class="w-3 h-3 rounded-full mt-0.5" style="background-color: #4ecdc4;"></div>
+        <div>
+          <p class="font-semibold text-gray-800">Infección Activa</p>
+          <p class="text-gray-600">Virus atacando células del cuello</p>
+        </div>
+      </div>
+
+      <div class="flex items-start space-x-2 bg-white/60 p-2 rounded md:col-span-2">
+        <div class="w-3 h-3 rounded-full mt-0.5" style="background-color: #3498db;"></div>
+        <div>
+          <p class="font-semibold text-gray-800">Sistema Linfático</p>
+          <p class="text-gray-600">Pierna → Torso → Cuello (transporte de células inmunes)</p>
+        </div>
+      </div>
+    </div>
+    <p class="text-xs text-gray-500 mt-3 italic">
+      💡 Las partículas de colores muestran las rutas reales de transmisión del VPH en el cuerpo humano
+    </p>
+  </div>
+</div>

@@ -1,0 +1,268 @@
+<div class="laboratorio-container">
+  <div class="toasts-container">
+    @for (toast of toasts; track toast.id) {
+      <div class="toast" [class]="toast.type">
+        <div class="toast-msg">{{ toast.msg }}</div>
+        <button class="toast-close" (click)="dismissToast(toast.id)">✕</button>
+      </div>
+    }
+  </div>
+  <!-- Header del laboratorio -->
+  <div class="laboratorio-header">
+    <div class="flex items-center space-x-4">
+      <button class="btn-volver" (click)="volver()">
+        <span>←</span>
+        <span>Volver</span>
+      </button>
+      <div>
+        <h1 class="titulo-laboratorio">🧪 Laboratorio Virtual de VPH</h1>
+        <p class="subtitulo-laboratorio">Investiga cepas del VPH con herramientas científicas avanzadas</p>
+      </div>
+    </div>
+    <button class="btn-completar" (click)="completarExperiencia()">
+      ✅ Completar Laboratorio
+    </button>
+  </div>
+
+  <div class="laboratorio-content">
+    <!-- Panel izquierdo: Herramientas y muestras -->
+    <div class="panel-lateral">
+      <!-- Herramientas -->
+      <div class="seccion-herramientas">
+        <h3 class="seccion-titulo">🛠️ Herramientas</h3>
+        <div class="herramientas-grid">
+          @for (herramienta of herramientas; track herramienta.id) {
+            <button
+              class="herramienta-btn"
+              [class.activa]="herramienta.activa"
+              (click)="seleccionarHerramienta(herramienta.id)"
+              [title]="herramienta.descripcion">
+              <span class="herramienta-icono">{{ herramienta.icono }}</span>
+              <span class="herramienta-nombre">{{ herramienta.nombre }}</span>
+            </button>
+          }
+        </div>
+
+        <!-- Controles específicos -->
+        @if (getHerramientaActiva()?.id === 'zoom') {
+          <div class="controles-zoom">
+            <label>Zoom: {{ zoom }}x</label>
+            <div class="slider-container">
+              <input type="range" min="50" max="1000" [value]="zoom" (input)="setZoom(+($any($event.target).value))" class="slider">
+            </div>
+            <div class="botones-zoom">
+              <button (click)="ajustarZoom(-50)">🔍-</button>
+              <button (click)="ajustarZoom(50)">🔍+</button>
+            </div>
+          </div>
+        }
+
+        @if (getHerramientaActiva()?.id === 'iluminacion') {
+          <div class="controles-iluminacion">
+            <label>Iluminación: {{ iluminacion }}%</label>
+            <div class="slider-container">
+              <input type="range" min="0" max="100" [value]="iluminacion" (input)="setIluminacion(+($any($event.target).value))" class="slider">
+            </div>
+            <div class="botones-iluminacion">
+              <button (click)="ajustarIluminacion(-10)">💡-</button>
+              <button (click)="ajustarIluminacion(10)">💡+</button>
+            </div>
+          </div>
+        }
+
+        @if (getHerramientaActiva()?.id === 'analisis') {
+          <div class="panel-analisis">
+            <button class="btn-analisis" (click)="realizarAnalisis()" [disabled]="!muestraSeleccionada">
+              📊 Realizar Análisis Molecular
+            </button>
+            @if (!muestraSeleccionada) {
+              <p class="aviso-muestra">Selecciona una muestra primero</p>
+            }
+
+            @if (analysisInProgress) {
+              <div class="analysis-progress">
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="analysisProgress"></div>
+                </div>
+                <small>{{ analysisProgress }}%</small>
+              </div>
+            }
+
+            @if (analysisResults.length > 0) {
+              <div class="analysis-results">
+                <h4>Resultados del Análisis</h4>
+                <ul>
+                  @for (res of analysisResults; track res) {
+                    <li>{{ res }}</li>
+                  }
+                </ul>
+                <button class="btn-clear" (click)="clearAnalysis()">Limpiar resultados</button>
+              </div>
+            }
+          </div>
+        }
+
+        @if (getHerramientaActiva()?.id === 'muestreo') {
+          <div class="panel-muestreo">
+            <button class="btn-muestreo" (click)="tomarMuestra()" [disabled]="!muestraSeleccionada">
+              🧪 Tomar Muestra
+            </button>
+            @if (!muestraSeleccionada) {
+              <p class="aviso-muestra">Selecciona una muestra primero</p>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Muestras disponibles -->
+      <div class="seccion-muestras">
+        <h3 class="seccion-titulo">🧬 Muestras Disponibles</h3>
+        <div class="muestras-list">
+          @for (muestra of muestras; track muestra.id) {
+            <div
+              class="muestra-item"
+              [class.seleccionada]="muestraSeleccionada?.id === muestra.id"
+              (click)="seleccionarMuestra(muestra)">
+              <div class="muestra-icono">{{ muestra.imagen }}</div>
+              <div class="muestra-info">
+                <h4 class="muestra-nombre">{{ muestra.nombre }}</h4>
+                <p class="muestra-descripcion">{{ muestra.descripcion }}</p>
+                <div class="muestra-cepas">
+                  <small>Cepas: {{ muestra.cepasDetectadas.length }}</small>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel central: Microscopio -->
+    <div class="panel-central">
+      <div class="microscopio-container">
+        <div class="microscopio-header">
+          <h3>🔬 Microscopio Electrónico Virtual</h3>
+          @if (muestraSeleccionada) {
+            <div class="muestra-actual">
+              <span class="muestra-icono">{{ muestraSeleccionada.imagen }}</span>
+              <span>{{ muestraSeleccionada.nombre }}</span>
+            </div>
+          }
+        </div>
+
+        <div class="microscopio-viewport">
+          <canvas #microscopioCanvas class="microscopio-canvas"></canvas>
+
+          @if (!muestraSeleccionada) {
+            <div class="no-muestra-overlay">
+              <div class="no-muestra-content">
+                <span class="no-muestra-icon">🔬</span>
+                <p>Selecciona una muestra del panel lateral para comenzar el análisis</p>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="microscopio-info">
+          <div class="info-item">
+            <span class="info-label">Campo de visión:</span>
+            <span class="info-value">{{ zoom }}x</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Iluminación:</span>
+            <span class="info-value">{{ iluminacion }}%</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Partículas:</span>
+            <span class="info-value">{{ particulas.length }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel derecho: Información de cepas -->
+    <div class="panel-derecho">
+      @if (cepaSeleccionada) {
+        <div class="cepa-detalle">
+          <div class="cepa-header">
+            <div class="cepa-icono">{{ cepaSeleccionada.imagen }}</div>
+            <div class="cepa-titulo">
+              <h3>{{ cepaSeleccionada.nombre }}</h3>
+              <span class="cepa-tipo" [class]="cepaSeleccionada.tipo">
+                {{ cepaSeleccionada.tipo === 'alto-riesgo' ? '🚨 Alto Riesgo' : '✅ Bajo Riesgo' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="cepa-info">
+            <p class="cepa-descripcion">{{ cepaSeleccionada.descripcion }}</p>
+
+            <div class="cepa-caracteristicas">
+              <div class="caracteristica">
+                <span class="caracteristica-label">Número:</span>
+                <span class="caracteristica-valor">{{ cepaSeleccionada.numero }}</span>
+              </div>
+              <div class="caracteristica">
+                <span class="caracteristica-label">Tamaño:</span>
+                <span class="caracteristica-valor">{{ cepaSeleccionada.tamano }} nm</span>
+              </div>
+              <div class="caracteristica">
+                <span class="caracteristica-label">Forma:</span>
+                <span class="caracteristica-valor">{{ cepaSeleccionada.forma }}</span>
+              </div>
+            </div>
+
+            <div class="cepa-sintomas">
+              <h4>🩺 Síntomas:</h4>
+              <ul>
+                @for (sintoma of cepaSeleccionada.sintomas; track sintoma) {
+                  <li>{{ sintoma }}</li>
+                }
+              </ul>
+            </div>
+
+            <div class="cepa-prevencion">
+              <h4>🛡️ Prevención:</h4>
+              <ul>
+                @for (prev of cepaSeleccionada.prevencion; track prev) {
+                  <li>{{ prev }}</li>
+                }
+              </ul>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="no-cepa-seleccionada">
+          <div class="no-cepa-content">
+            <span class="no-cepa-icon">🔬</span>
+            <h3>Selecciona una Cepa</h3>
+            <p>Haz clic en una cepa detectada para ver información detallada</p>
+          </div>
+        </div>
+      }
+
+      <!-- Cepas detectadas en la muestra actual -->
+      @if (muestraSeleccionada) {
+        <div class="cepas-detectadas">
+          <h4 class="cepas-titulo">🦠 Cepas Detectadas</h4>
+          <div class="cepas-list">
+            @for (cepa of getCepasDetectadas(); track cepa.id) {
+              <div
+                class="cepa-item"
+                [class.seleccionada]="cepaSeleccionada?.id === cepa.id"
+                (click)="seleccionarCepa(cepa)">
+                <div class="cepa-item-icono" [style.color]="cepa.color">{{ cepa.imagen }}</div>
+                <div class="cepa-item-info">
+                  <div class="cepa-item-nombre">{{ cepa.nombre }}</div>
+                  <div class="cepa-item-tipo" [class]="cepa.tipo">
+                    {{ cepa.tipo === 'alto-riesgo' ? 'Alto' : 'Bajo' }}
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

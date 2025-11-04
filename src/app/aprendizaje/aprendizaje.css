@@ -1,0 +1,152 @@
+/* Tema unificado para toda la aplicación - Minimalista, limpio, profesional */
+
+:root {
+  --color-primary: #2563eb;
+  --color-primary-dark: #1e40af;
+  --color-secondary: #64748b;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-bg-light: #f9fafb;
+  --color-bg-white: #ffffff;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+  --color-border: #e5e7eb;
+}
+
+/* Fondo general consistente */
+.min-h-screen.bg-linear-to-br {
+  background: var(--color-bg-light);
+}
+
+/* Header - Simplificado y consistente */
+.bg-white.shadow-lg.border-b {
+  background: var(--color-bg-white);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.text-3xl.font-bold.text-gray-900 {
+  color: var(--color-text-primary);
+  font-size: 28px;
+}
+
+.text-gray-600 {
+  color: var(--color-text-secondary);
+}
+
+/* Experiencias Grid - Cards unificadas */
+.grid.grid-cols-1 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* Card de experiencia */
+.bg-white.rounded-xl {
+  background: var(--color-bg-white);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--color-border);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bg-white.rounded-xl:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  border-color: var(--color-primary);
+}
+
+/* Colores de gradiente para cards - Unificados a azul */
+.bg-linear-to-br.from-blue-500.to-purple-600 {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+}
+
+/* Badges de estado */
+.text-sm.text-orange-600,
+.text-sm.text-blue-600,
+.text-sm.text-green-600 {
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.text-sm.text-orange-600 {
+  color: #d97706;
+}
+
+.text-sm.text-blue-600 {
+  color: var(--color-primary);
+}
+
+.text-sm.text-green-600 {
+  color: var(--color-success);
+}
+
+/* Badge circular de completado */
+.bg-green-500.text-white.rounded-full {
+  background: var(--color-success);
+  color: white;
+}
+
+/* Progreso bar */
+.bg-blue-600 {
+  background-color: var(--color-primary);
+}
+
+.bg-gray-200 {
+  background-color: var(--color-border);
+}
+
+/* Textos generales */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-text-primary);
+}
+
+p {
+  color: var(--color-text-secondary);
+}
+
+/* Componentes internos (viaje-3d, laboratorio-virtual, quiz) */
+.bg-white.shadow-lg {
+  background: var(--color-bg-white);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+}
+
+/* Buttons generales */
+button.bg-blue-600 {
+  background-color: var(--color-primary);
+}
+
+button.bg-blue-600:hover {
+  background-color: var(--color-primary-dark);
+}
+
+button.bg-gray-600 {
+  background-color: var(--color-secondary);
+}
+
+button.bg-gray-600:hover {
+  background-color: #525252;
+}
+
+/* Links */
+a.text-blue-600,
+.text-blue-600 {
+  color: var(--color-primary);
+}
+
+a.text-blue-600:hover,
+.text-blue-600:hover {
+  color: var(--color-primary-dark);
+}
+
+/* Consistencia de fuente */
+* {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Smooth transitions en toda la app */
+* {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}

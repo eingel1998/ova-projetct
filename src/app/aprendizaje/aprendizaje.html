@@ -1,0 +1,84 @@
+<div class="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100">
+  <!-- Header -->
+  <div class="bg-white shadow-lg border-b">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Módulo de Aprendizaje</h1>
+          <p class="text-gray-600 mt-1">Explora el Virus del Papiloma Humano de forma interactiva</p>
+        </div>
+        <div class="text-right">
+          <div class="text-sm text-gray-500">Progreso General</div>
+          <div class="w-32 bg-gray-200 rounded-full h-2 mt-1">
+            <div class="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                 [style.width.%]="progresoGeneral()"></div>
+          </div>
+          <div class="text-xs text-gray-600 mt-1">{{ progresoGeneral() | number:'1.0-0' }}% completado</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido Principal -->
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Menú de Experiencias (si no hay experiencia seleccionada) -->
+    <div *ngIf="!experienciaActual()" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div *ngFor="let exp of experiencias()"
+           class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer transform hover:-translate-y-1"
+           [class.opacity-50]="!exp.disponible"
+           [class.cursor-not-allowed]="!exp.disponible"
+           (click)="seleccionarExperiencia(exp.id)">
+
+        <!-- Badge de completado -->
+        <div *ngIf="exp.completada" class="absolute top-4 right-4 bg-green-500 text-white rounded-full p-2 z-10">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+          </svg>
+        </div>
+
+        <!-- Icono y título -->
+        <div class="p-6 text-white" style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);">
+          <div class="text-4xl mb-2">{{ exp.icono }}</div>
+          <h3 class="text-xl font-bold">{{ exp.titulo }}</h3>
+        </div>
+
+        <!-- Descripción -->
+        <div class="p-6">
+          <p class="text-gray-600 mb-4">{{ exp.descripcion }}</p>
+
+          <!-- Estado -->
+          <div class="flex items-center justify-between">
+            <span *ngIf="!exp.disponible" class="text-sm text-orange-600 font-medium">
+              🔒 Bloqueado - Completa la experiencia anterior
+            </span>
+            <span *ngIf="exp.disponible && !exp.completada" class="text-sm text-blue-600 font-medium">
+              🚀 Disponible
+            </span>
+            <span *ngIf="exp.completada" class="text-sm text-green-600 font-medium">
+              ✅ Completada
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <app-viaje-3d
+      *ngIf="experienciaActual() === 'viaje-microscopico'"
+      [completada]="getCompletadaStatus('viaje-microscopico')"
+      (onCompletar)="onViajeMicroscopicoCompletar()"
+      (onVolver)="onViajeMicroscopicoVolver()">
+    </app-viaje-3d>
+
+    <app-laboratorio-virtual
+      *ngIf="experienciaActual() === 'laboratorio-virtual'"
+      (onCompletar)="onLaboratorioCompletar()"
+      (onVolver)="onLaboratorioVolver()">
+    </app-laboratorio-virtual>
+
+    <app-quiz
+      *ngIf="experienciaActual() === 'quizzes-interactivos'"
+      (onCompletar)="onQuizCompletar()"
+      (onVolver)="onQuizVolver()">
+    </app-quiz>
+  </div>
+</div>

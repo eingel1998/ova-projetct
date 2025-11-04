@@ -1,0 +1,108 @@
+<!-- Header de la experiencia -->
+<div class="bg-linear-to-r from-blue-600 to-purple-600 text-white p-6 mb-6 rounded-lg">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <span class="text-3xl">🔬</span>
+      <div>
+        <h2 class="text-2xl font-bold">Viaje Microscópico Interactivo</h2>
+        <p class="text-blue-100">Explora el camino del VPH dentro del cuerpo humano</p>
+      </div>
+    </div>
+    <button (click)="volverAlMenu()"
+            class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition-all duration-200">
+      ← Volver al menú
+    </button>
+  </div>
+</div>
+
+<!-- Contenido de la experiencia -->
+<div class="space-y-6">
+  <!-- Mapa del cuerpo humano -->
+  <div class="relative bg-linear-to-b from-blue-50 to-indigo-50 rounded-lg p-8">
+    <h3 class="text-xl font-bold text-center mb-6 text-gray-800">Mapa Interactivo del Cuerpo Humano</h3>
+
+    <!-- Representación simplificada del cuerpo -->
+    <div class="relative max-w-2xl mx-auto">
+      <!-- Cabeza -->
+      <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-pink-200 rounded-full border-4 border-pink-300 cursor-pointer hover:bg-pink-300 transition-colors"
+           title="Cabeza - Punto de entrada potencial">
+        <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-8 border-transparent border-t-pink-300"></div>
+      </div>
+
+      <!-- Tronco -->
+      <div class="absolute top-16 left-1/2 transform -translate-x-1/2 w-24 h-32 bg-blue-200 rounded-lg border-4 border-blue-300 cursor-pointer hover:bg-blue-300 transition-colors"
+           title="Tronco - Sistema circulatorio">
+        <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-6 border-r-6 border-t-8 border-transparent border-t-blue-300"></div>
+      </div>
+
+      <!-- Brazos -->
+      <div class="absolute top-20 left-8 w-12 h-20 bg-yellow-200 rounded-lg border-4 border-yellow-300 cursor-pointer hover:bg-yellow-300 transition-colors"
+           title="Brazo izquierdo"></div>
+      <div class="absolute top-20 right-8 w-12 h-20 bg-yellow-200 rounded-lg border-4 border-yellow-300 cursor-pointer hover:bg-yellow-300 transition-colors"
+           title="Brazo derecho"></div>
+
+      <!-- Piernas -->
+      <div class="absolute top-44 left-12 w-8 h-24 bg-green-200 rounded-lg border-4 border-green-300 cursor-pointer hover:bg-green-300 transition-colors"
+           title="Pierna izquierda"></div>
+      <div class="absolute top-44 right-12 w-8 h-24 bg-green-200 rounded-lg border-4 border-green-300 cursor-pointer hover:bg-green-300 transition-colors"
+           title="Pierna derecha"></div>
+
+      <!-- Área genital -->
+      <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-12 h-8 bg-red-200 rounded-lg border-4 border-red-300 cursor-pointer hover:bg-red-300 transition-colors animate-pulse"
+           title="Área genital - Zona de alto riesgo">
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-red-600 font-bold text-xs">VPH</div>
+      </div>
+    </div>
+
+    <!-- Leyenda -->
+    <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+      <div class="flex items-center space-x-2">
+        <div class="w-4 h-4 bg-pink-200 border-2 border-pink-300 rounded-full"></div>
+        <span>Cabeza</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <div class="w-4 h-4 bg-blue-200 border-2 border-blue-300 rounded"></div>
+        <span>Sistema circulatorio</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <div class="w-4 h-4 bg-yellow-200 border-2 border-yellow-300 rounded"></div>
+        <span>Extremidades</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <div class="w-4 h-4 bg-red-200 border-2 border-red-300 rounded animate-pulse"></div>
+        <span>Área genital (alto riesgo)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Información educativa -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-blue-50 rounded-lg p-6">
+      <h4 class="text-lg font-semibold text-blue-800 mb-3">¿Cómo entra el VPH?</h4>
+      <ul class="space-y-2 text-blue-700">
+        <li>• Contacto directo con piel infectada</li>
+        <li>• Relaciones sexuales sin protección</li>
+        <li>• De madre a hijo durante el parto</li>
+        <li>• Contacto con objetos contaminados</li>
+      </ul>
+    </div>
+
+    <div class="bg-green-50 rounded-lg p-6">
+      <h4 class="text-lg font-semibold text-green-800 mb-3">Defensas del cuerpo</h4>
+      <ul class="space-y-2 text-green-700">
+        <li>• Sistema inmunológico</li>
+        <li>• Células especializadas (linfocitos)</li>
+        <li>• Barreras físicas (piel, mucosas)</li>
+        <li>• Respuesta inflamatoria</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Botón de completar experiencia -->
+  <div class="text-center">
+    <button (click)="marcarCompletada()"
+            class="bg-linear-to-r from-green-500 to-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-105">
+      ✅ Marcar como completada
+    </button>
+  </div>
+</div>
