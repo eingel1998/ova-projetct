@@ -34,9 +34,10 @@ interface Muestra {
 
 @Component({
   selector: 'app-laboratorio-virtual',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './laboratorio-virtual.html',
-  styleUrl: './laboratorio-virtual.css',
+  styleUrls: ['./laboratorio-virtual.css'],
 })
 export class LaboratorioVirtual implements OnInit, OnDestroy {
   @ViewChild('microscopioCanvas', { static: true }) canvas!: ElementRef<HTMLCanvasElement>;
