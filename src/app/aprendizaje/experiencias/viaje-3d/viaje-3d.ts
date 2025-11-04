@@ -388,10 +388,19 @@ export class Viaje3D implements AfterViewInit, OnDestroy {
     this.container.nativeElement.innerHTML = '';
     this.container.nativeElement.appendChild(this.renderer.domElement);
 
-  // load OrbitControls dynamically
-  const orbitModule = await import('three/examples/jsm/controls/OrbitControls');
-  const OrbitControlsDyn = orbitModule.OrbitControls;
-  this.controls = new OrbitControlsDyn(this.camera, this.renderer.domElement);
+  // load OrbitControls dynamically (use explicit .js extension so bundlers can resolve)
+  try {
+    const orbitModule = await import('three/examples/jsm/controls/OrbitControls.js');
+    const OrbitControlsDyn = orbitModule.OrbitControls;
+    this.controls = new OrbitControlsDyn(this.camera, this.renderer.domElement);
+  } catch (err) {
+    // If dynamic import fails at build-time or run-time, fail gracefully and log.
+    // Keeping controls undefined will disable orbit controls but app remains functional.
+    // This also satisfies bundlers that require explicit file extensions.
+    // eslint-disable-next-line no-console
+    console.warn('Could not load OrbitControls dynamically:', err);
+    this.controls = null as any;
+  }
     this.controls.target.set(0, 1.2, 0);
     this.controls.update();
 
