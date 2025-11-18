@@ -1,9 +1,145 @@
-<!-- Componente Estadísticas Vivas - Próximamente -->
-<div class="bg-green-50 border-2 border-green-200 rounded-lg p-8 text-center">
-  <div class="text-6xl mb-4">📊</div>
-  <h3 class="text-2xl font-bold text-green-800 mb-4">Estadísticas Vivas</h3>
-  <p class="text-green-700 mb-6">Analiza datos globales sobre el VPH con gráficos interactivos y dinámicos.</p>
-  <div class="bg-green-100 rounded-lg p-4">
-    <p class="text-sm text-green-600">🚧 Esta experiencia está en desarrollo. Completa las experiencias anteriores para desbloquearla.</p>
+<div class="estadisticas-vivas-container">
+  <!-- Header -->
+  <div class="toolbar flex items-center justify-between mb-6 p-4 bg-white rounded-lg shadow">
+    <div class="flex items-center space-x-3">
+      <button class="btn" (click)="volver()">
+        <span>←</span>
+        <span>Volver</span>
+      </button>
+      <div>
+        <h3 class="text-lg font-semibold text-gray-800">Estadísticas Vivas - Datos sobre el VPH</h3>
+        <p class="text-xs text-gray-500">Explora estadísticas globales y locales con gráficos interactivos</p>
+      </div>
+    </div>
+    <button class="btn-primary" (click)="marcarCompletada()">✅ Completar experiencia</button>
+  </div>
+
+  <!-- Selector de Vista -->
+  <div class="view-selector mb-6">
+    <button
+      class="tab-btn"
+      [class.active]="vistaActual === 'global'"
+      (click)="cambiarVista('global')">
+      🌍 Datos Globales
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="vistaActual === 'guajira'"
+      (click)="cambiarVista('guajira')">
+      🏞️ La Guajira
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="vistaActual === 'comparativo'"
+      (click)="cambiarVista('comparativo')">
+      📊 Comparativo
+    </button>
+  </div>
+
+  <!-- Contenido Principal -->
+  <div class="content-grid">
+    <!-- Estadísticas Principales -->
+    <div class="stats-cards">
+      <div *ngFor="let stat of (vistaActual === 'guajira' ? datosLaGuajira : estadisticasGlobales)"
+           class="stat-card"
+           [style.border-left-color]="stat.color">
+        <div class="stat-value" [style.color]="stat.color">
+          {{ stat.valor }}{{ stat.unidad === '%' ? '%' : '' }}
+          <span *ngIf="stat.unidad !== '%' && stat.unidad !== 'casos' && stat.unidad !== 'muertes'" class="stat-unit">{{ stat.unidad }}</span>
+        </div>
+        <div class="stat-title">{{ stat.titulo }}</div>
+        <div class="stat-description">{{ stat.descripcion }}</div>
+      </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="charts-section">
+      <!-- Gráfico de Barras -->
+      <div class="chart-container">
+        <h4 class="chart-title">Relación VPH con Tipos de Cáncer</h4>
+        <svg class="bar-chart" viewBox="0 0 400 250">
+          <g *ngFor="let data of datosGraficoBarras; let i = index"
+             class="bar-group">
+            <rect
+              class="bar"
+              [attr.x]="i * 60 + 40"
+              [attr.y]="220 - getBarHeight(data.value, getMaxValue(datosGraficoBarras))"
+              [attr.width]="40"
+              [attr.height]="getBarHeight(data.value, getMaxValue(datosGraficoBarras))"
+              [attr.fill]="data.color">
+            </rect>
+            <text
+              class="bar-label"
+              [attr.x]="i * 60 + 60"
+              [attr.y]="235"
+              text-anchor="middle">
+              {{ data.label }}
+            </text>
+            <text
+              class="bar-value"
+              [attr.x]="i * 60 + 60"
+              [attr.y]="210 - getBarHeight(data.value, getMaxValue(datosGraficoBarras))"
+              text-anchor="middle">
+              {{ data.value }}%
+            </text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Gráfico de Pastel -->
+      <div class="chart-container">
+        <h4 class="chart-title">Distribución de Cepas VPH en Cáncer Cervical</h4>
+        <svg class="pie-chart" viewBox="0 0 200 200">
+          <g *ngFor="let data of datosGraficoPastel; let i = index">
+            <path
+              [attr.d]="getPiePath(data.value, getPieTotal(), i)"
+              [attr.fill]="data.color"
+              class="pie-slice">
+            </path>
+          </g>
+          <!-- Leyenda -->
+          <g class="pie-legend">
+            <g *ngFor="let data of datosGraficoPastel; let i = index">
+              <rect
+                [attr.x]="120"
+                [attr.y]="20 + i * 20"
+                width="15"
+                height="15"
+                [attr.fill]="data.color">
+              </rect>
+              <text
+                [attr.x]="140"
+                [attr.y]="32 + i * 20"
+                class="legend-text">
+                {{ data.label }} ({{ data.value }}%)
+              </text>
+            </g>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Información Educativa -->
+    <div class="info-section">
+      <div class="info-card">
+        <h4 class="info-title">💡 ¿Qué Significan Estos Datos?</h4>
+        <div class="info-content">
+          <p><strong>Datos Globales:</strong> El VPH es la infección de transmisión sexual más común, causando más de 620,000 casos de cáncer cervical al año.</p>
+          <p><strong>La Guajira:</strong> La baja cobertura de vacunación (9.1%) y conocimiento limitado representan un desafío significativo para la prevención.</p>
+          <p><strong>Prevención:</strong> La vacunación puede reducir hasta el 90% de los casos de cáncer relacionados con VPH.</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h4 class="info-title">🎯 Estrategia 90-70-90 de la OMS</h4>
+        <div class="info-content">
+          <ul>
+            <li><strong>90% de vacunación:</strong> Alcanzar cobertura universal en niñas de 9-14 años</li>
+            <li><strong>70% de tamizaje:</strong> Detectar precozmente lesiones precancerosas</li>
+            <li><strong>90% de tratamiento:</strong> Tratar efectivamente los casos detectados</li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

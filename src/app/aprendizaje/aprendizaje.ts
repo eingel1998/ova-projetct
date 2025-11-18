@@ -2,7 +2,8 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Viaje3D } from './experiencias/viaje-3d/viaje-3d';
 import { LaboratorioVirtual } from './experiencias/laboratorio-virtual/laboratorio-virtual';
-import { QuizComponent } from '../quiz/quiz';
+import { EstadisticasVivas } from './experiencias/estadisticas-vivas/estadisticas-vivas';
+import { AventuraPrevencion } from './experiencias/aventura-prevencion/aventura-prevencion';
 
 interface ExperienciaAprendizaje {
   id: string;
@@ -15,7 +16,7 @@ interface ExperienciaAprendizaje {
 
 @Component({
   selector: 'app-aprendizaje',
-  imports: [CommonModule, Viaje3D, LaboratorioVirtual, QuizComponent],
+  imports: [CommonModule, Viaje3D, LaboratorioVirtual, EstadisticasVivas, AventuraPrevencion],
   templateUrl: './aprendizaje.html',
   styleUrl: './aprendizaje.css',
 })
@@ -38,14 +39,6 @@ export class Aprendizaje {
       completada: false
     },
     {
-      id: 'quizzes-interactivos',
-      titulo: 'Quizzes Interactivos',
-      descripcion: 'Pon a prueba tus conocimientos sobre el VPH',
-      icono: '🧠',
-      disponible: true,
-      completada: false
-    },
-    {
       id: 'estadisticas-vivas',
       titulo: 'Estadísticas Vivas',
       descripcion: 'Analiza datos globales sobre el VPH',
@@ -58,14 +51,6 @@ export class Aprendizaje {
       titulo: 'Aventura de Prevención',
       descripcion: 'Toma decisiones para prevenir el VPH',
       icono: '🛡️',
-      disponible: false,
-      completada: false
-    },
-    {
-      id: 'biblioteca-interactiva',
-      titulo: 'Biblioteca Interactiva',
-      descripcion: 'Explora recursos multimedia sobre el VPH',
-      icono: '📚',
       disponible: false,
       completada: false
     }
@@ -129,12 +114,21 @@ export class Aprendizaje {
     this.volverAlMenu();
   }
 
-  // Handlers para quizzes
-  onQuizCompletar() {
-    this.marcarCompletada('quizzes-interactivos');
+  // Handlers para estadísticas vivas
+  onEstadisticasCompletar() {
+    this.marcarCompletada('estadisticas-vivas');
   }
 
-  onQuizVolver() {
+  onEstadisticasVolver() {
+    this.volverAlMenu();
+  }
+
+  // Handlers para aventura prevención
+  onAventuraCompletar() {
+    this.marcarCompletada('aventura-prevencion');
+  }
+
+  onAventuraVolver() {
     this.volverAlMenu();
   }
 

@@ -1,9 +1,96 @@
-<!-- Componente Aventura de Prevención - Próximamente -->
-<div class="bg-purple-50 border-2 border-purple-200 rounded-lg p-8 text-center">
-  <div class="text-6xl mb-4">🛡️</div>
-  <h3 class="text-2xl font-bold text-purple-800 mb-4">Aventura de Prevención</h3>
-  <p class="text-purple-700 mb-6">Toma decisiones que afectan la salud preventiva en una narrativa interactiva.</p>
-  <div class="bg-purple-100 rounded-lg p-4">
-    <p class="text-sm text-purple-600">🚧 Esta experiencia está en desarrollo. Completa las experiencias anteriores para desbloquearla.</p>
+<div class="aventura-container">
+  <!-- Header -->
+  <div class="toolbar flex items-center justify-between mb-6 p-4 bg-white rounded-lg shadow">
+    <div class="flex items-center space-x-3">
+      <button class="btn" (click)="volver()">
+        <span>←</span>
+        <span>Volver</span>
+      </button>
+      <div>
+        <h3 class="text-lg font-semibold text-gray-800">Aventura de Prevención - Toma Decisiones Saludables</h3>
+        <p class="text-xs text-gray-500">Elige opciones que afectan tu salud y aprendizaje sobre VPH</p>
+      </div>
+    </div>
+    <button class="btn-primary" (click)="marcarCompletada()">✅ Completar experiencia</button>
+  </div>
+
+  <!-- Estado del Jugador -->
+  <div class="status-bar mb-6">
+    <div class="status-item">
+      <span class="status-label">Salud:</span>
+      <div class="progress-bar">
+        <div class="progress-fill health" [style.width.%]="puntosSalud"></div>
+      </div>
+      <span class="status-value">{{ puntosSalud }}/100</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Prevención:</span>
+      <div class="progress-bar">
+        <div class="progress-fill prevention" [style.width.%]="puntosPrevencion"></div>
+      </div>
+      <span class="status-value">{{ puntosPrevencion }}/100</span>
+    </div>
+  </div>
+
+  <!-- Juego Terminado -->
+  <div *ngIf="juegoTerminado" class="game-over">
+    <div class="scenario-card final">
+      <div class="scenario-image">{{ escenarioActual.imagen }}</div>
+      <h3 class="scenario-title">{{ escenarioActual.titulo }}</h3>
+      <p class="scenario-description">{{ escenarioActual.descripcion }}</p>
+      <div class="final-result">
+        <h4>Resultado Final:</h4>
+        <p>{{ getResultadoFinal() }}</p>
+        <div class="final-scores">
+          <div>Salud Final: {{ puntosSalud }}/100</div>
+          <div>Prevención Final: {{ puntosPrevencion }}/100</div>
+        </div>
+      </div>
+      <button class="btn-restart" (click)="reiniciarJuego()">🔄 Jugar de Nuevo</button>
+    </div>
+  </div>
+
+  <!-- Escenario Actual -->
+  <div *ngIf="!juegoTerminado" class="scenario-card">
+    <div class="scenario-image">{{ escenarioActual.imagen }}</div>
+    <h3 class="scenario-title">{{ escenarioActual.titulo }}</h3>
+    <p class="scenario-description">{{ escenarioActual.descripcion }}</p>
+
+    <div class="options">
+      <button
+        *ngFor="let opcion of escenarioActual.opciones"
+        class="option-btn"
+        (click)="seleccionarOpcion(opcion)">
+        <div class="option-text">{{ opcion.texto }}</div>
+        <div class="option-effects">
+          <span class="effect health" [class.positive]="opcion.puntosSalud > 0" [class.negative]="opcion.puntosSalud < 0">
+            ❤️ {{ opcion.puntosSalud > 0 ? '+' : '' }}{{ opcion.puntosSalud }}
+          </span>
+          <span class="effect prevention" [class.positive]="opcion.puntosPrevencion > 0" [class.negative]="opcion.puntosPrevencion < 0">
+            🛡️ {{ opcion.puntosPrevencion > 0 ? '+' : '' }}{{ opcion.puntosPrevencion }}
+          </span>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Historia Reciente -->
+  <div *ngIf="historia.length > 0" class="history-panel">
+    <h4>Última Consecuencia:</h4>
+    <div class="history-item">
+      {{ historia[historia.length - 1] }}
+    </div>
+  </div>
+
+  <!-- Consejos Educativos -->
+  <div class="tips-panel">
+    <h4>💡 Consejos de Prevención</h4>
+    <ul>
+      <li>La vacunación es la mejor protección contra el VPH</li>
+      <li>Los exámenes regulares permiten detección temprana</li>
+      <li>La comunicación abierta con parejas es esencial</li>
+      <li>El uso de condón reduce pero no elimina el riesgo</li>
+      <li>La información confiable viene de fuentes médicas oficiales</li>
+    </ul>
   </div>
 </div>

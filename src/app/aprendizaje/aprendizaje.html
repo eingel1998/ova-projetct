@@ -75,10 +75,16 @@
       (onVolver)="onLaboratorioVolver()">
     </app-laboratorio-virtual>
 
-    <app-quiz
-      *ngIf="experienciaActual() === 'quizzes-interactivos'"
-      (onCompletar)="onQuizCompletar()"
-      (onVolver)="onQuizVolver()">
-    </app-quiz>
+    <app-estadisticas-vivas
+      *ngIf="experienciaActual() === 'estadisticas-vivas'"
+      (onCompletar)="onEstadisticasCompletar()"
+      (onVolver)="onEstadisticasVolver()">
+    </app-estadisticas-vivas>
+
+    <app-aventura-prevencion
+      *ngIf="experienciaActual() === 'aventura-prevencion'"
+      (onCompletar)="onAventuraCompletar()"
+      (onVolver)="onAventuraVolver()">
+    </app-aventura-prevencion>
   </div>
 </div>
