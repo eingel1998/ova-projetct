@@ -80,6 +80,11 @@
   </nav>
 </aside>
 
+<!-- Auth widget en la esquina superior derecha -->
+<div class="fixed top-4 right-4 z-50">
+  <app-auth></app-auth>
+</div>
+
 <!-- Contenido principal -->
 <main [class.ml-64]="sidebarOpen()" class="min-h-screen bg-gray-50 transition-all duration-300 md:ml-64">
   <div class="p-4 md:p-8">

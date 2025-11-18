@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { SupabaseService } from '../services/supabase.service';
 import { Viaje3D } from './experiencias/viaje-3d/viaje-3d';
 import { LaboratorioVirtual } from './experiencias/laboratorio-virtual/laboratorio-virtual';
 import { EstadisticasVivas } from './experiencias/estadisticas-vivas/estadisticas-vivas';
@@ -20,7 +21,8 @@ interface ExperienciaAprendizaje {
   templateUrl: './aprendizaje.html',
   styleUrl: './aprendizaje.css',
 })
-export class Aprendizaje {
+export class Aprendizaje implements OnInit {
+  private supabaseService = inject(SupabaseService);
   experiencias = signal<ExperienciaAprendizaje[]>([
     {
       id: 'viaje-microscopico',
@@ -43,7 +45,7 @@ export class Aprendizaje {
       titulo: 'Estadísticas Vivas',
       descripcion: 'Analiza datos globales sobre el VPH',
       icono: '📊',
-      disponible: false,
+      disponible: true,
       completada: false
     },
     {
@@ -51,7 +53,7 @@ export class Aprendizaje {
       titulo: 'Aventura de Prevención',
       descripcion: 'Toma decisiones para prevenir el VPH',
       icono: '🛡️',
-      disponible: false,
+      disponible: true,
       completada: false
     }
   ]);
@@ -59,9 +61,35 @@ export class Aprendizaje {
   experienciaActual = signal<string | null>(null);
   progresoGeneral = signal(0);
 
+  async ngOnInit() {
+    console.log('Aprendizaje ngOnInit start');
+    try {
+      const user = await this.supabaseService.getCurrentUser();
+      console.log('Aprendizaje user', user);
+      if (user?.id) {
+        const progress = await this.supabaseService.getProgress(user.id);
+        // map progress to experiencias
+        this.experiencias.update(exps =>
+          exps.map(exp => ({
+            ...exp,
+            completada: !!progress.find((p: any) => p.experiencia_id === exp.id && p.completada)
+          }))
+        );
+
+        // calcular progreso
+        const completadas = this.experiencias().filter(e => e.completada).length;
+        this.progresoGeneral.set((completadas / this.experiencias().length) * 100);
+      }
+    } catch (err) {
+      console.warn('No se pudo cargar progreso desde Supabase', err);
+    }
+    console.log('Aprendizaje ngOnInit end');
+  }
+
   seleccionarExperiencia(experienciaId: string) {
+    console.log('seleccionarExperiencia', experienciaId);
     const exp = this.experiencias().find(e => e.id === experienciaId);
-    if (exp && exp.disponible) {
+    if (exp) {
       this.experienciaActual.set(experienciaId);
     }
   }
@@ -79,21 +107,21 @@ export class Aprendizaje {
       )
     );
 
-    // Desbloquear siguiente experiencia si existe
-    const index = this.experiencias().findIndex(e => e.id === experienciaId);
-    if (index >= 0 && index < this.experiencias().length - 1) {
-      this.experiencias.update(exps =>
-        exps.map((exp, i) =>
-          i === index + 1
-            ? { ...exp, disponible: true }
-            : exp
-        )
-      );
-    }
-
     // Actualizar progreso general
     const completadas = this.experiencias().filter(e => e.completada).length;
     this.progresoGeneral.set((completadas / this.experiencias().length) * 100);
+
+    // Persistir en Supabase (si hay usuario)
+    (async () => {
+      try {
+        const user = await this.supabaseService.getCurrentUser();
+        if (user?.id) {
+          await this.supabaseService.upsertProgress(user.id, experienciaId, { completada: true, updated_at: new Date().toISOString() });
+        }
+      } catch (err) {
+        console.warn('No se pudo persistir progreso en Supabase', err);
+      }
+    })();
   }
 
   // Handlers para los componentes hijos

@@ -25,8 +25,6 @@
     <div *ngIf="!experienciaActual()" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div *ngFor="let exp of experiencias()"
            class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer transform hover:-translate-y-1"
-           [class.opacity-50]="!exp.disponible"
-           [class.cursor-not-allowed]="!exp.disponible"
            (click)="seleccionarExperiencia(exp.id)">
 
         <!-- Badge de completado -->
@@ -48,10 +46,7 @@
 
           <!-- Estado -->
           <div class="flex items-center justify-between">
-            <span *ngIf="!exp.disponible" class="text-sm text-orange-600 font-medium">
-              🔒 Bloqueado - Completa la experiencia anterior
-            </span>
-            <span *ngIf="exp.disponible && !exp.completada" class="text-sm text-blue-600 font-medium">
+            <span *ngIf="!exp.completada" class="text-sm text-blue-600 font-medium">
               🚀 Disponible
             </span>
             <span *ngIf="exp.completada" class="text-sm text-green-600 font-medium">

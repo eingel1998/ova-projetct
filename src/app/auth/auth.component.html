@@ -1,0 +1,17 @@
+<div class="auth-widget p-2 bg-transparent text-sm text-slate-800 flex items-center space-x-2">
+  <form *ngIf="!isLoggedIn()" (ngSubmit)="login()" class="flex items-center space-x-2">
+    <input name="email" type="email" placeholder="tu@email" [(ngModel)]="email"
+      class="rounded-md px-2 py-1 border border-slate-300 text-sm" required />
+    <input name="password" type="password" placeholder="Contraseña (opcional)" [(ngModel)]="password"
+      class="rounded-md px-2 py-1 border border-slate-300 text-sm" />
+    <button type="submit" class="px-3 py-1 bg-sky-600 text-white rounded-md">Iniciar</button>
+  </form>
+
+  <div *ngIf="isLoggedIn()" class="flex items-center space-x-2">
+    <span class="text-xs text-slate-600">{{ user()?.email }}</span>
+    <span *ngIf="profile()?.role" class="px-2 py-0.5 text-xs bg-slate-100 rounded text-slate-700">{{ profile()?.role }}</span>
+    <button (click)="logout()" class="px-3 py-1 bg-red-600 text-white rounded-md">Cerrar</button>
+  </div>
+
+  <div *ngIf="message()" class="text-xs text-slate-500 ml-2">{{ message() }}</div>
+</div>
