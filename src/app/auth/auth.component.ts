@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../services/supabase.service';
@@ -20,47 +20,88 @@ export class AuthComponent {
   profile = signal<any>(null);
 
   isLoggedIn = computed(() => !!this.user());
+  isRegistering = signal(false);
+  displayName = signal('');
+  showModal = signal(false);
+
+  @Output() closeModal = new EventEmitter<void>();
 
   private unsub: (() => void) | null = null;
 
   constructor() {
-    // load current user (if any)
-    (async () => {
-      try {
-        const u = await this.supabase.getCurrentUser();
-        this.user.set(u);
-        if (u?.id) {
-          const p = await this.supabase.getProfile(u.id);
-          this.profile.set(p);
-        }
-        this.subscribeAuth();
-      } catch (err) {
-        console.warn('No se pudo cargar usuario', err);
+    // Initialize session state
+    this.initializeSession();
+  }
+
+  private async initializeSession() {
+    try {
+      // 1. Get initial session immediately
+      const user = await this.supabase.getCurrentUser();
+      if (user) {
+        this.user.set(user);
+        const profile = await this.supabase.getProfile(user.id);
+        this.profile.set(profile);
       }
-    })();
+
+      // 2. Subscribe to changes (handles sign in, sign out, and token refreshes)
+      this.subscribeAuth();
+    } catch (err) {
+      console.warn('Error initializing session:', err);
+    }
+  }
+
+  toggleMode() {
+    this.isRegistering.set(!this.isRegistering());
+    this.message.set('');
+    // Clear form data to prevent sharing between modes
+    this.email.set('');
+    this.password.set('');
+    this.displayName.set('');
+  }
+
+  openModal() {
+    this.showModal.set(true);
+  }
+
+  close() {
+    this.showModal.set(false);
+    this.closeModal.emit();
+  }
+
+  async handleSubmit() {
+    this.message.set('');
+    try {
+      if (this.isRegistering()) {
+        // Registro
+        const { data, error } = await this.supabase.signUp(this.email(), this.password(), {
+          display_name: this.displayName() || this.email().split('@')[0]
+        });
+        if (error) throw error;
+        this.message.set('Registro exitoso. ' + (data.session ? 'Bienvenido!' : 'Por favor verifica tu correo.'));
+        if (data.session) {
+          setTimeout(() => this.close(), 1500);
+        }
+      } else {
+        // Login
+        if (this.password()) {
+          const { error } = await this.supabase.signInWithPassword(this.email(), this.password());
+          if (error) throw error;
+          this.message.set('Sesión iniciada');
+          setTimeout(() => this.close(), 1000);
+        } else {
+          const { error } = await this.supabase.signInWithEmail(this.email());
+          if (error) throw error;
+          this.message.set('Revisa tu correo para entrar.');
+        }
+      }
+    } catch (err: any) {
+      console.error('Error en auth', err);
+      this.message.set(err?.message || 'Error en autenticación');
+    }
   }
 
   async login() {
-    this.message.set('');
-    try {
-      if (this.password()) {
-        await this.supabase.signInWithPassword(this.email(), this.password());
-      } else {
-        await this.supabase.signInWithEmail(this.email());
-      }
-      // refresh user
-      const u = await this.supabase.getCurrentUser();
-      this.user.set(u);
-      if (u?.id) {
-        const p = await this.supabase.getProfile(u.id);
-        this.profile.set(p);
-      }
-      if (this.password()) this.message.set('Sesión iniciada');
-      else this.message.set('Revisa tu correo para entrar (link de un solo uso).');
-    } catch (err: any) {
-      console.error('Error en login', err);
-      this.message.set(err?.message || 'Error al iniciar sesión');
-    }
+    await this.handleSubmit();
   }
 
   ngOnDestroy() {
@@ -68,14 +109,20 @@ export class AuthComponent {
   }
 
   private async subscribeAuth() {
-    // keep UI updated after OTP login or password login
-    this.unsub = this.supabase.onAuthStateChange((event, session) => {
-      this.user.set(session?.user ?? null);
-      if (session?.user?.id) {
-        (async () => this.profile.set(await this.supabase.getProfile(session.user.id)))();
+    this.unsub = this.supabase.onAuthStateChange(async (event, session) => {
+      const currentUser = session?.user ?? null;
+      this.user.set(currentUser);
+
+      if (currentUser) {
+        // Refresh profile on sign in or token refresh
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+          const profile = await this.supabase.getProfile(currentUser.id);
+          this.profile.set(profile);
+        }
       } else {
         this.profile.set(null);
       }
+
       if (event === 'SIGNED_IN') this.message.set('Sesión iniciada');
       if (event === 'SIGNED_OUT') this.message.set('Sesión cerrada');
     });
@@ -84,7 +131,12 @@ export class AuthComponent {
   async logout() {
     try {
       await this.supabase.signOut();
+      // Clear all local state
       this.user.set(null);
+      this.profile.set(null);
+      this.email.set('');
+      this.password.set('');
+      this.displayName.set('');
       this.message.set('Sesión cerrada');
     } catch (err) {
       console.warn('Error en logout', err);

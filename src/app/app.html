@@ -1,24 +1,19 @@
 <!-- Botón de hamburguesa fijo -->
-<button
-  (click)="toggleSidebar()"
+<button (click)="toggleSidebar()"
   class="fixed top-4 left-4 z-50 bg-slate-800 text-white p-3 rounded-lg shadow-lg hover:bg-slate-700 transition-all duration-200 md:hidden">
   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path *ngIf="!sidebarOpen()" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-    <path *ngIf="sidebarOpen()" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    <path *ngIf="!sidebarOpen()" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+      d="M4 6h16M4 12h16M4 18h16"></path>
+    <path *ngIf="sidebarOpen()" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+      d="M6 18L18 6M6 6l12 12"></path>
   </svg>
 </button>
 
 <!-- Overlay para móvil -->
-<div
-  *ngIf="sidebarOpen()"
-  (click)="closeSidebar()"
-  class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-  ></div>
+<div *ngIf="sidebarOpen()" (click)="closeSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"></div>
 
 <!-- Barra lateral -->
-<aside
-  [class.translate-x-0]="sidebarOpen()"
-  [class.-translate-x-full]="!sidebarOpen()"
+<aside [class.translate-x-0]="sidebarOpen()" [class.-translate-x-full]="!sidebarOpen()"
   class="fixed left-0 top-0 h-full w-64 bg-slate-800 text-white shadow-xl transform transition-transform duration-300 ease-in-out z-50 md:translate-x-0">
 
   <!-- Header de la barra lateral -->
@@ -27,7 +22,9 @@
       <div class="flex items-center space-x-3">
         <div class="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center">
           <svg class="w-6 h-6 text-slate-300" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 2L3 7v11a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V7l-7-5z" clip-rule="evenodd"></path>
+            <path fill-rule="evenodd"
+              d="M10 2L3 7v11a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V7l-7-5z"
+              clip-rule="evenodd"></path>
           </svg>
         </div>
         <div>
@@ -36,9 +33,7 @@
         </div>
       </div>
       <!-- Botón cerrar en móvil -->
-      <button
-        (click)="closeSidebar()"
-        class="text-slate-400 hover:text-white transition-colors md:hidden">
+      <button (click)="closeSidebar()" class="text-slate-400 hover:text-white transition-colors md:hidden">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
@@ -50,30 +45,31 @@
   <nav class="p-4">
     <ul class="space-y-2">
       <li>
-        <a routerLink="/aprendizaje"
-           routerLinkActive="bg-white text-slate-800"
-           (click)="closeSidebar()"
-           class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition-all duration-200 font-medium text-slate-300 hover:text-white">
+        <a routerLink="/aprendizaje" routerLinkActive="bg-white text-slate-800" (click)="closeSidebar()"
+          class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition-all duration-200 font-medium text-slate-300 hover:text-white">
           <span class="text-lg">📚</span>
           <span>Aprendizaje</span>
         </a>
       </li>
       <li>
-        <a routerLink="/quiz"
-           routerLinkActive="bg-white text-slate-800"
-           (click)="closeSidebar()"
-           class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition-all duration-200 font-medium text-slate-300 hover:text-white">
+        <a routerLink="/quiz" routerLinkActive="bg-white text-slate-800" (click)="closeSidebar()"
+          class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition-all duration-200 font-medium text-slate-300 hover:text-white">
           <span class="text-lg">🧠</span>
           <span>Quiz</span>
         </a>
       </li>
       <li>
-        <a routerLink="/recursos"
-           routerLinkActive="bg-white text-slate-800"
-           (click)="closeSidebar()"
-           class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition-all duration-200 font-medium text-slate-300 hover:text-white">
+        <a routerLink="/recursos" routerLinkActive="bg-white text-slate-800" (click)="closeSidebar()"
+          class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition-all duration-200 font-medium text-slate-300 hover:text-white">
           <span class="text-lg">📖</span>
           <span>Recursos</span>
+        </a>
+      </li>
+      <li *ngIf="isAdmin()">
+        <a routerLink="/admin" routerLinkActive="bg-white text-slate-800" (click)="closeSidebar()"
+          class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition-all duration-200 font-medium text-slate-300 hover:text-white">
+          <span class="text-lg">⚙️</span>
+          <span>Panel Admin</span>
         </a>
       </li>
     </ul>

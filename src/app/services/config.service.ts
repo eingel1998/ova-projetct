@@ -8,7 +8,6 @@ export class ConfigService {
     try {
       const response = await fetch('/config.json');
       this.config = await response.json();
-      console.log('✅ Configuración cargada:', this.config);
     } catch (err) {
       console.error('❌ Error cargando config.json:', err);
       this.config = {};

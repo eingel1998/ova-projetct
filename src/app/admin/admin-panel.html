@@ -13,8 +13,8 @@
     <tbody>
       <tr *ngFor="let p of progreso" class="border-b">
         <td class="py-2">{{ p.profiles?.display_name || p.profiles?.email || p.user_id }}</td>
-        <td class="py-2">{{ p.experiencia_id }}</td>
-        <td class="py-2">{{ p.completada ? '✅' : '❌' }}</td>
+        <td class="py-2">{{ getQuizTitle(p.experiencia_id) }}</td>
+        <td class="py-2">{{ p.completed ? '✅' : '❌' }}</td>
         <td class="py-2">{{ p.score || '-' }}</td>
         <td class="py-2">{{ p.updated_at || p.created_at | date:'short' }}</td>
       </tr>

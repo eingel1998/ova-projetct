@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SupabaseService } from '../services/supabase.service';
+import { QUIZZES } from '../quiz/quiz.data';
 
 @Component({
   selector: 'app-admin-panel',
@@ -23,5 +24,14 @@ export class AdminPanel {
     } catch (err) {
       console.error('No se pudo cargar progreso', err);
     }
+  }
+
+  getQuizTitle(experienciaId: string): string {
+    if (experienciaId.startsWith('quiz_')) {
+      const id = experienciaId.replace('quiz_', '');
+      const quiz = QUIZZES.find(q => q.id === id);
+      return quiz ? quiz.title : experienciaId;
+    }
+    return experienciaId;
   }
 }

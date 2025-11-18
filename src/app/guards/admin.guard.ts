@@ -9,25 +9,59 @@ export class AdminGuard implements CanActivate {
 
   async canActivate(): Promise<boolean> {
     console.log('AdminGuard.canActivate called');
+    
     if (!this.supabase.isConfigured()) {
       console.warn('Supabase not configured — Admin routes are unavailable.');
-      // If we don't have a Supabase configuration, redirect to learning
       this.router.navigate(['/aprendizaje']);
       return false;
     }
-    const user = await this.supabase.getCurrentUser();
-    console.log('AdminGuard current user:', user);
-    if (!user) {
+    
+    try {
+      let user = await this.supabase.getCurrentUser();
+      // If no user yet, wait shortly for the auth client to restore any persisted session
+      if (!user) {
+        user = await new Promise((resolve) => {
+          let resolved = false;
+          const unsub = this.supabase.onAuthStateChange((event, session) => {
+            if (!resolved && session?.user) {
+              resolved = true;
+              unsub();
+              resolve(session.user);
+            }
+          });
+          // fallback timeout
+          setTimeout(() => {
+            if (!resolved) {
+              resolved = true;
+              try { unsub(); } catch (_) {}
+              resolve(null);
+            }
+          }, 1200);
+        });
+      }
+      console.log('AdminGuard current user:', user);
+      
+      if (!user) {
+        console.log('AdminGuard: No user logged in');
+        this.router.navigate(['/aprendizaje']);
+        return false;
+      }
+
+      const profile = await this.supabase.getProfile(user.id);
+      console.log('AdminGuard profile:', profile);
+      
+      if (profile?.role === 'admin') {
+        console.log('AdminGuard: Access granted');
+        return true;
+      }
+      
+      console.log('AdminGuard: User is not admin, redirecting');
+      this.router.navigate(['/aprendizaje']);
+      return false;
+    } catch (error) {
+      console.error('AdminGuard error:', error);
       this.router.navigate(['/aprendizaje']);
       return false;
     }
-
-    const profile = await this.supabase.getProfile(user.id);
-    if (profile?.role === 'admin') return true;
-    console.log('AdminGuard no admin role, profile=', profile);
-
-    // no permissions
-    this.router.navigate(['/aprendizaje']);
-    return false;
   }
 }

@@ -14,7 +14,13 @@ export class SupabaseService {
     
     if (url && key) {
       try {
-        this.supabase = createClient(url, key);
+        this.supabase = createClient(url, key, {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+          }
+        });
       } catch (err) {
         console.error('Failed creating supabase client', err);
         this.supabase = null;
@@ -55,6 +61,15 @@ export class SupabaseService {
   async signInWithPassword(email: string, password: string) {
     if (!this.supabase) throw new Error('Supabase not configured');
     return await this.supabase.auth.signInWithPassword({ email, password });
+  }
+
+  async signUp(email: string, password: string, data: any = {}) {
+    if (!this.supabase) throw new Error('Supabase not configured');
+    return await this.supabase.auth.signUp({
+      email,
+      password,
+      options: { data }
+    });
   }
 
   async signOut() {

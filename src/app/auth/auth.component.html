@@ -1,17 +1,113 @@
-<div class="auth-widget p-2 bg-transparent text-sm text-slate-800 flex items-center space-x-2">
-  <form *ngIf="!isLoggedIn()" (ngSubmit)="login()" class="flex items-center space-x-2">
-    <input name="email" type="email" placeholder="tu@email" [(ngModel)]="email"
-      class="rounded-md px-2 py-1 border border-slate-300 text-sm" required />
-    <input name="password" type="password" placeholder="Contraseña (opcional)" [(ngModel)]="password"
-      class="rounded-md px-2 py-1 border border-slate-300 text-sm" />
-    <button type="submit" class="px-3 py-1 bg-sky-600 text-white rounded-md">Iniciar</button>
-  </form>
+<!-- Botón de Auth (Siempre visible) -->
+<div class="relative">
+  <button (click)="isLoggedIn() ? logout() : openModal()"
+    class="flex items-center space-x-2 bg-white text-slate-800 px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-all duration-200 font-medium border border-slate-200">
 
-  <div *ngIf="isLoggedIn()" class="flex items-center space-x-2">
-    <span class="text-xs text-slate-600">{{ user()?.email }}</span>
-    <span *ngIf="profile()?.role" class="px-2 py-0.5 text-xs bg-slate-100 rounded text-slate-700">{{ profile()?.role }}</span>
-    <button (click)="logout()" class="px-3 py-1 bg-red-600 text-white rounded-md">Cerrar</button>
-  </div>
+    <!-- Estado: No Logueado -->
+    <ng-container *ngIf="!isLoggedIn()">
+      <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+      </svg>
+      <span>Entrar</span>
+    </ng-container>
 
-  <div *ngIf="message()" class="text-xs text-slate-500 ml-2">{{ message() }}</div>
+    <!-- Estado: Logueado -->
+    <ng-container *ngIf="isLoggedIn()">
+      <div
+        class="w-7 h-7 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 text-xs font-bold border border-indigo-200">
+        {{ (profile()?.display_name || user()?.email || 'U').charAt(0).toUpperCase() }}
+      </div>
+      <span class="hidden sm:inline text-sm font-semibold text-slate-700 max-w-[100px] truncate">
+        {{ profile()?.display_name || 'Usuario' }}
+      </span>
+      <svg class="w-4 h-4 text-red-400 hover:text-red-600 transition-colors ml-1" fill="none" stroke="currentColor"
+        viewBox="0 0 24 24" title="Cerrar Sesión">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+      </svg>
+    </ng-container>
+  </button>
 </div>
+
+
+
+<!-- Modal -->
+@if (showModal() && !isLoggedIn()) {
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm"
+  (click)="close()">
+  <div class="auth-modal bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all"
+    (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-6 border-b border-slate-200">
+      <h2 class="text-2xl font-bold text-slate-800">{{ isRegistering() ? 'Crear Cuenta' : 'Bienvenido' }}</h2>
+      <button (click)="close()" class="text-slate-400 hover:text-slate-600 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6">
+      <!-- Tabs -->
+      <div class="flex border-b border-slate-200 mb-6">
+        <button (click)="!isRegistering() ? null : toggleMode()" [class.border-b-2]="!isRegistering()"
+          [class.border-indigo-600]="!isRegistering()" [class.text-indigo-600]="!isRegistering()"
+          [class.font-semibold]="!isRegistering()"
+          class="flex-1 pb-3 text-center font-medium transition-all text-slate-600">
+          Iniciar Sesión
+        </button>
+        <button (click)="isRegistering() ? null : toggleMode()" [class.border-b-2]="isRegistering()"
+          [class.border-indigo-600]="isRegistering()" [class.text-indigo-600]="isRegistering()"
+          [class.font-semibold]="isRegistering()"
+          class="flex-1 pb-3 text-center font-medium transition-all text-slate-600">
+          Registrarse
+        </button>
+      </div>
+
+      <!-- Form -->
+      <form (ngSubmit)="handleSubmit()" class="flex flex-col space-y-4">
+        @if (isRegistering()) {
+        <div class="fade-in">
+          <label class="block text-sm font-medium text-slate-700 mb-2">Nombre</label>
+          <input name="displayName" type="text" placeholder="Tu nombre" [(ngModel)]="displayName"
+            class="w-full rounded-lg px-4 py-3 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" />
+        </div>
+        }
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-2">Correo electrónico</label>
+          <input name="email" type="email" placeholder="tu@email.com" [(ngModel)]="email"
+            class="w-full rounded-lg px-4 py-3 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+            required />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-2">Contraseña</label>
+          <input name="password" type="password" placeholder="••••••••" [(ngModel)]="password"
+            class="w-full rounded-lg px-4 py-3 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+            required />
+        </div>
+
+        <button type="submit"
+          class="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+          {{ isRegistering() ? 'Crear Cuenta' : 'Iniciar Sesión' }}
+        </button>
+      </form>
+
+      @if (message()) {
+      <div class="mt-4 p-3 rounded-lg text-sm font-medium"
+        [class.bg-green-50]="message().includes('exitoso') || message().includes('iniciada')"
+        [class.text-green-700]="message().includes('exitoso') || message().includes('iniciada')"
+        [class.bg-red-50]="message().includes('Error') || message().includes('Incorrecto')"
+        [class.text-red-700]="message().includes('Error') || message().includes('Incorrecto')"
+        [class.bg-blue-50]="!message().includes('exitoso') && !message().includes('Error') && !message().includes('iniciada')"
+        [class.text-blue-700]="!message().includes('exitoso') && !message().includes('Error') && !message().includes('iniciada')">
+        {{ message() }}
+      </div>
+      }
+    </div>
+  </div>
+</div>
+}

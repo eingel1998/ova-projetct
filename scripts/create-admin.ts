@@ -19,14 +19,28 @@ const supabase = createClient(URL, SERVICE_ROLE);
 
 async function main() {
   try {
-    // Create user (admin) via admin API
-    const { data: userData, error: userError } = await supabase.auth.admin.createUser({
-      email: ADMIN_EMAIL,
-      password: ADMIN_PASSWORD,
-    });
-    if (userError) throw userError;
-    const user = userData?.user;
-    console.log('User created', user?.id);
+    // Check for an existing user by email (admin API - requires service role)
+    const { data: listData, error: listError } = await supabase.auth.admin.listUsers({ perPage: 100 });
+    if (listError) throw listError;
+
+    const adminEmail = ADMIN_EMAIL!.toLowerCase();
+    let user = listData?.users?.find((u: any) => u.email?.toLowerCase() === adminEmail);
+
+    if (user) {
+      console.log('Admin already exists with id', user.id);
+      // Ensure confirmed
+      await supabase.auth.admin.updateUserById(user.id, { email_confirm: true });
+    } else {
+      // Create a new user (admin) via admin API
+      const { data: userData, error: userError } = await supabase.auth.admin.createUser({
+        email: ADMIN_EMAIL,
+        password: ADMIN_PASSWORD,
+        email_confirm: true,
+      });
+      if (userError) throw userError;
+      user = userData?.user;
+      console.log('User created', user?.id);
+    }
 
     // Upsert profile with role admin
     const { data, error } = await supabase.from('profiles').upsert({ id: user!.id, email: ADMIN_EMAIL, display_name: 'Admin', role: 'admin' }).select();
