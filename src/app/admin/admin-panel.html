@@ -1,23 +1,184 @@
 <div class="p-6">
-  <h2 class="text-2xl font-bold mb-4">Panel de Administrador — Resultados</h2>
-  <table class="w-full text-left border-collapse">
-    <thead>
-      <tr class="border-b">
-        <th class="py-2">Usuario</th>
-        <th class="py-2">Experiencia</th>
-        <th class="py-2">Completada</th>
-        <th class="py-2">Calificacion</th>
-        <th class="py-2">Fecha</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let p of progreso" class="border-b">
-        <td class="py-2">{{ p.profiles?.display_name || p.profiles?.email || p.user_id }}</td>
-        <td class="py-2">{{ getQuizTitle(p.experiencia_id) }}</td>
-        <td class="py-2">{{ p.completed ? '✅' : '❌' }}</td>
-        <td class="py-2">{{ p.score || '-' }}</td>
-        <td class="py-2">{{ p.updated_at || p.created_at | date:'short' }}</td>
-      </tr>
-    </tbody>
-  </table>
+  <!-- Tabs Navigation -->
+  <div class="mb-6 border-b border-gray-300">
+    <nav class="flex space-x-4">
+      <button (click)="setTab('resultados')" [class.border-blue-500]="activeTab === 'resultados'"
+        [class.text-blue-600]="activeTab === 'resultados'" [class.border-transparent]="activeTab !== 'resultados'"
+        [class.text-gray-500]="activeTab !== 'resultados'"
+        class="pb-2 px-1 border-b-2 font-medium transition-colors hover:text-blue-600">
+        📊 Resultados
+      </button>
+      <button (click)="setTab('usuarios')" [class.border-blue-500]="activeTab === 'usuarios'"
+        [class.text-blue-600]="activeTab === 'usuarios'" [class.border-transparent]="activeTab !== 'usuarios'"
+        [class.text-gray-500]="activeTab !== 'usuarios'"
+        class="pb-2 px-1 border-b-2 font-medium transition-colors hover:text-blue-600">
+        👥 Gestión de Usuarios
+      </button>
+    </nav>
+  </div>
+
+  <!-- Tab: Resultados -->
+  <div *ngIf="activeTab === 'resultados'">
+    <h2 class="text-2xl font-bold mb-4">Panel de Administrador — Resultados</h2>
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="border-b">
+          <th class="py-2">Usuario</th>
+          <th class="py-2">Experiencia</th>
+          <th class="py-2">Completada</th>
+          <th class="py-2">Calificacion</th>
+          <th class="py-2">Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of progreso" class="border-b">
+          <td class="py-2">{{ p.profiles?.display_name || p.profiles?.email || p.user_id }}</td>
+          <td class="py-2">{{ getQuizTitle(p.experiencia_id) }}</td>
+          <td class="py-2">{{ p.completed ? '✅' : '❌' }}</td>
+          <td class="py-2">{{ p.score || '-' }}</td>
+          <td class="py-2">{{ p.updated_at || p.created_at | date:'short' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Tab: Usuarios -->
+  <div *ngIf="activeTab === 'usuarios'">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-bold">Gestión de Usuarios</h2>
+    </div>
+
+    <!-- Messages -->
+    <div *ngIf="errorMessage" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+      {{ errorMessage }}
+    </div>
+    <div *ngIf="successMessage" class="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+      {{ successMessage }}
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="text-center py-4">
+      <p class="text-gray-600">Cargando...</p>
+    </div>
+
+    <!-- Users Table -->
+    <div *ngIf="!loading && !editingUser" class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b-2 border-gray-300 bg-gray-50">
+            <th class="py-3 px-4">Nombre</th>
+            <th class="py-3 px-4">Email</th>
+            <th class="py-3 px-4">Rol</th>
+            <th class="py-3 px-4">Creado</th>
+            <th class="py-3 px-4">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of usuarios" class="border-b hover:bg-gray-50">
+            <td class="py-3 px-4">{{ user.display_name }}</td>
+            <td class="py-3 px-4">{{ user.email }}</td>
+            <td class="py-3 px-4">
+              <span [class.bg-purple-100]="user.role === 'admin'" [class.text-purple-800]="user.role === 'admin'"
+                [class.bg-blue-100]="user.role === 'user'" [class.text-blue-800]="user.role === 'user'"
+                class="px-2 py-1 rounded text-xs font-semibold">
+                {{ user.role }}
+              </span>
+            </td>
+            <td class="py-3 px-4">{{ user.created_at | date:'short' }}</td>
+            <td class="py-3 px-4">
+              <button (click)="startEdit(user)"
+                class="mr-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm">
+                ✏️ Editar
+              </button>
+              <button (click)="deleteUser(user)"
+                class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">
+                🗑️ Eliminar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p *ngIf="usuarios.length === 0" class="text-center text-gray-500 py-8">
+        No hay usuarios disponibles
+      </p>
+    </div>
+
+    <!-- Edit User Form -->
+    <div *ngIf="editingUser" class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+      <h3 class="text-xl font-bold mb-4">
+        ✏️ Editar Usuario: {{ editingUser.display_name }}
+      </h3>
+
+      <form [formGroup]="userForm" (ngSubmit)="saveUser()">
+        <!-- Display Name -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Nombre
+          </label>
+          <input type="text" formControlName="display_name"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Nombre del usuario">
+          <p *ngIf="userForm.get('display_name')?.invalid && userForm.get('display_name')?.touched"
+            class="text-red-500 text-xs mt-1">
+            El nombre es requerido
+          </p>
+        </div>
+
+        <!-- Email -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Email
+          </label>
+          <input type="email" formControlName="email"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="correo@ejemplo.com">
+          <p *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched" class="text-red-500 text-xs mt-1">
+            Ingresa un email válido
+          </p>
+        </div>
+
+        <!-- Role -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Rol
+          </label>
+          <select formControlName="role"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="user">Usuario</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+
+        <!-- Password -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Nueva Contraseña (opcional)
+          </label>
+          <input type="password" formControlName="password"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Dejar en blanco para no cambiar">
+          <p *ngIf="userForm.get('password')?.invalid && userForm.get('password')?.touched"
+            class="text-red-500 text-xs mt-1">
+            La contraseña debe tener al menos 6 caracteres
+          </p>
+          <p class="text-xs text-gray-500 mt-1">
+            Mínimo 4 caracteres. Déjalo vacío si no quieres cambiar la contraseña.
+          </p>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex space-x-3">
+          <button type="submit" [disabled]="loading || !userForm.valid"
+            class="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed">
+            💾 Guardar Cambios
+          </button>
+          <button type="button" (click)="cancelEdit()" [disabled]="loading"
+            class="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed">
+            ❌ Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>

@@ -1,2 +1,155 @@
-.admin-header { margin-bottom: 1rem }
-.admin-table { width: 100% }
+/* Admin Panel - Premium Styling */
+
+.admin-panel {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Beautiful Tabs */
+nav button {
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+nav button:hover {
+  transform: translateY(-2px);
+}
+
+/* Premium Table Styling */
+table {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+thead tr {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+thead th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  padding: 1rem;
+}
+
+tbody tr {
+  transition: all 0.2s ease;
+}
+
+tbody tr:hover {
+  background-color: #f8f9ff;
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+}
+
+tbody td {
+  padding: 0.875rem 1rem;
+  color: #374151;
+}
+
+/* Buttons - Premium Design */
+button {
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Form Inputs - Modern Look */
+input,
+select {
+  transition: all 0.3s ease;
+}
+
+input:focus,
+select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Role Badge Enhancement */
+.px-2.py-1.rounded {
+  font-weight: 600;
+  border: 1px solid currentColor;
+  transition: all 0.2s ease;
+}
+
+/* Messages Animation */
+.bg-red-100,
+.bg-green-100,
+.bg-yellow-50 {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading State */
+.text-center.py-4 {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Form Container */
+.max-w-2xl.mx-auto {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  table {
+    font-size: 0.875rem;
+  }
+
+  thead th,
+  tbody td {
+    padding: 0.5rem;
+  }
+
+  button {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem !important;
+  }
+}

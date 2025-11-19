@@ -11,14 +11,16 @@ export class SupabaseService {
     // Lazy create supabase client only when env vars are present
     const url = this.configService.get('SUPABASE_URL');
     const key = this.configService.get('SUPABASE_ANON_KEY');
-    
+
     if (url && key) {
       try {
         this.supabase = createClient(url, key, {
           auth: {
             persistSession: true,
             autoRefreshToken: true,
-            detectSessionInUrl: true
+            detectSessionInUrl: true,
+            flowType: 'pkce',
+            storageKey: 'sb-auth-token'  // Usar una key específica
           }
         });
       } catch (err) {
@@ -82,7 +84,7 @@ export class SupabaseService {
   }
 
   onAuthStateChange(callback: (event: string, session: any) => void) {
-    if (!this.supabase) return () => {};
+    if (!this.supabase) return () => { };
     const { data } = this.supabase.auth.onAuthStateChange((event, session) => callback(event, session));
     // return unsubscribe
     // data.subscription is an object with unsubscribe() on some supabase versions
@@ -121,5 +123,65 @@ export class SupabaseService {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'progress' }, (payload) => callback(payload))
       .subscribe();
     return channel;
+  }
+
+  // Admin: User Management CRUD
+  async getAllUsers() {
+    if (!this.supabase) return [];
+    const { data, error } = await this.supabase
+      .from('profiles')
+      .select('id, email, display_name, role, created_at, updated_at')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  }
+
+  async updateUserProfile(userId: string, updates: { display_name?: string; role?: string }) {
+    if (!this.supabase) throw new Error('Supabase not configured');
+    const { data, error } = await this.supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', userId)
+      .select();
+    if (error) throw error;
+    return data;
+  }
+
+  async updateUserEmail(userId: string, newEmail: string) {
+    if (!this.supabase) throw new Error('Supabase not configured');
+    // Note: This requires service_role key in production
+    // For now, we'll update the profile email field
+    // Updating auth.users email requires admin API or service role
+    const { data, error } = await this.supabase
+      .from('profiles')
+      .update({ email: newEmail })
+      .eq('id', userId)
+      .select();
+    if (error) throw error;
+    return data;
+  }
+
+  async updateUserPassword(userId: string, newPassword: string) {
+    if (!this.supabase) throw new Error('Supabase not configured');
+
+    // Llamar a la función SQL que cambia la contraseña
+    const { data, error } = await this.supabase.rpc('admin_update_user_password', {
+      user_id: userId,
+      new_password: newPassword
+    });
+
+    if (error) throw error;
+    return data || { success: true, message: 'Contraseña actualizada' };
+  }
+
+  async deleteUser(userId: string) {
+    if (!this.supabase) throw new Error('Supabase not configured');
+    // Deleting from profiles will cascade to auth.users if configured
+    const { error } = await this.supabase
+      .from('profiles')
+      .delete()
+      .eq('id', userId);
+    if (error) throw error;
+    return true;
   }
 }
